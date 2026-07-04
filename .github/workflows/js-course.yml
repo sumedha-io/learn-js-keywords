@@ -4,6 +4,11 @@ on: [push]
 jobs:
   verify-step:
     runs-on: ubuntu-latest
+    # This block explicitly grants the token permission to write comments
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
     steps:
       - name: Checkout student code
         uses: actions/checkout@v4

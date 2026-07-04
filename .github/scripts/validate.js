@@ -18,7 +18,33 @@ const birthYear = 2006;
 Commit and push your changes.`;
   } else {
     const content = fs.readFileSync("variables.js", "utf8");
+    // COURSE COMPLETE
+if (
+    content.includes("const birthYear") &&
+    content.includes("let score") &&
+    !content.includes("console.log(score)")
+) {
+    message = `# 🏆 Congratulations!
 
+You completed the JavaScript Scope Course.
+
+You learned:
+- ✅ const
+- ✅ let
+- ✅ Block Scope
+
+Excellent work! 🎉`;
+
+    const summary = process.env.GITHUB_STEP_SUMMARY;
+
+    if (summary) {
+        fs.appendFileSync(summary, message + "\n");
+    } else {
+        console.log(message);
+    }
+
+    process.exit(0);
+}
     // STEP 1
     if (
       !content.includes("const birthYear") ||

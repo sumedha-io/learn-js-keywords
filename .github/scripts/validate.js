@@ -4,54 +4,50 @@ const { execSync } = require("child_process");
 let message = "";
 
 try {
-    if (!fs.existsSync("variables.js")) {
-        message = `### 🤖 Step 1
+  if (!fs.existsSync("variables.js")) {
+    message = `### 🤖 Welcome!
 
-❌ **variables.js not found**
+❌ **Step 1: Create \`variables.js\`**
 
-Create a file named **variables.js** in the root of your repository.
-
-Inside it write:
+Create a file named \`variables.js\` and declare:
 
 \`\`\`javascript
 const birthYear = 2006;
 \`\`\`
-`;
-    } else {
-        const content = fs.readFileSync("variables.js", "utf8");
 
-        // STEP 1
-        if (
-            !content.includes("const birthYear") ||
-            content.includes("let birthYear") ||
-            content.includes("var birthYear")
-        ) {
-            message = `### 🤖 Step 1 Feedback
+Commit and push your changes.`;
+  } else {
+    const content = fs.readFileSync("variables.js", "utf8");
 
-❌ Declare **birthYear** using **const**.
+    // STEP 1
+    if (
+      !content.includes("const birthYear") ||
+      content.includes("let birthYear") ||
+      content.includes("var birthYear")
+    ) {
+      message = `### 🤖 Step 1 Feedback
+
+❌ Declare a variable named **birthYear** using **const**.
 
 Example:
 
 \`\`\`javascript
 const birthYear = 2006;
-\`\`\`
-`;
-        }
+\`\`\``;
+    }
 
-        // STEP 2 NOT STARTED
-        else if (
-            !content.includes("let score") ||
-            !content.includes("console.log(score)")
-        ) {
-            message = `### 🎉 Step 1 Passed!
+    // STEP 2
+    else if (
+      !content.includes("let score") ||
+      !content.includes("console.log(score)")
+    ) {
+      message = `### 🎉 Step 1 Passed!
 
-Great job using **const**.
-
----
+Great! You used **const** correctly.
 
 ## 📝 Step 2
 
-Now add this code below your first variable.
+Now add this code to **variables.js**
 
 \`\`\`javascript
 if (true) {
@@ -61,43 +57,37 @@ if (true) {
 console.log(score);
 \`\`\`
 
-Commit and push your changes.`;
-        }
+Commit and push again.`;
+    }
 
-        // STEP 2
-        else {
-            try {
-                execSync("node variables.js", {
-                    stdio: "pipe"
-                });
+    // STEP 3
+    else {
+      try {
+        execSync("node variables.js", { stdio: "pipe" });
 
-                message = `### 🤖 Step 2 Feedback
+        message = `### 🤖 Step 2 Feedback
 
 ❌ Your program ran successfully.
 
-It should produce a **ReferenceError**.
+It should throw
 
-Make sure
+\`\`\`
+ReferenceError: score is not defined
+\`\`\`
 
-- \`let score\` is INSIDE the if block.
-- \`console.log(score)\` is OUTSIDE the block.
-`;
-            } catch (error) {
+Make sure **console.log(score)** is outside the braces.`;
+      } catch (error) {
+        const output =
+          (error.stderr?.toString() || "") +
+          (error.stdout?.toString() || "") +
+          (error.message || "");
 
-                const output =
-                    (error.stderr?.toString() || "") +
-                    (error.stdout?.toString() || "") +
-                    (error.message || "");
-
-                if (output.includes("ReferenceError")) {
-
-                    message = `### 🎉 Step 2 Passed!
+        if (output.includes("ReferenceError")) {
+          message = `### 🎉 Step 2 Passed!
 
 Excellent!
 
-You have just learned that **let is block scoped.**
-
----
+You learned that **let** is block scoped.
 
 ## 📝 Final Step
 
@@ -107,60 +97,47 @@ Delete
 console.log(score);
 \`\`\`
 
-Run the file again.
+so the file executes without errors.
 
-When there are no errors, push your code.`;
+Commit and push one last time.`;
+        } else {
+          message = `### 🤖 Step 2 Feedback
 
-                } else {
+Your code crashed for a different reason.
 
-                    message = `### 🤖 Step 2 Feedback
-
-❌ Your code crashed for another reason.
-
-Expected:
-
-ReferenceError: score is not defined
-`;
-                }
-            }
-
-            // COURSE COMPLETE
-            if (
-                !content.includes("console.log(score)") &&
-                content.includes("let score")
-            ) {
-
-                try {
-                    execSync("node variables.js", {
-                        stdio: "pipe"
-                    });
-
-                    message = `# 🏆 Congratulations!
-
-You completed the JavaScript Scope Course.
-
-You learned:
-
-- ✅ const
-- ✅ let
-- ✅ Block Scope
-
-Excellent work! 🎉`;
-
-                } catch {}
-            }
+Check your syntax and try again.`;
         }
+      }
+
+      // COURSE COMPLETE
+      if (!content.includes("console.log(score)")) {
+        try {
+          execSync("node variables.js", { stdio: "pipe" });
+
+          message = `# 🏆 Congratulations!
+
+You have successfully completed the JavaScript Variables mini-course!
+
+✅ const
+
+✅ let
+
+✅ Block Scope
+
+Keep learning JavaScript! 🚀`;
+        } catch {}
+      }
     }
+  }
 
-    const summary = process.env.GITHUB_STEP_SUMMARY;
+  const summary = process.env.GITHUB_STEP_SUMMARY;
 
-    if (summary) {
-        fs.appendFileSync(summary, message + "\n");
-    } else {
-        console.log(message);
-    }
-
+  if (summary) {
+    fs.appendFileSync(summary, message + "\n");
+  } else {
+    console.log(message);
+  }
 } catch (error) {
-    console.error(error);
-    process.exit(1);
+  console.error(error);
+  process.exit(1);
 }

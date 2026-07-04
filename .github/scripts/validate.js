@@ -1,104 +1,166 @@
-const fs = require('fs');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const { execSync } = require("child_process");
+
+let message = "";
 
 try {
-  // Read the student's current step
-  const config = JSON.parse(fs.readFileSync('.github/config.json', 'utf8'));
-  const step = config.currentStep;
+    if (!fs.existsSync("variables.js")) {
+        message = `### 🤖 Step 1
 
-  let success = false;
-  let message = "";
-  let nextStepInstructions = "";
+❌ **variables.js not found**
 
-  // --- LESSON 1 RULES ---
-  if (step === 1) {
-    if (fs.existsSync('variables.js')) {
-      const content = fs.readFileSync('variables.js', 'utf8');
+Create a file named **variables.js** in the root of your repository.
 
-      if (
-        content.includes('const birthYear') &&
-        !content.includes('let birthYear') &&
-        !content.includes('var birthYear')
-      ) {
-        success = true;
-        message =
-          "### 🤖 Bot Review: Step 1 Passed!\n\n🎉 **Excellent!** You correctly used `const` for a value that should never change.\n\nNow let's move to the next topic.";
+Inside it write:
 
-        nextStepInstructions =
-          "### 📝 Step 2: Block Scoping with `let`\n\nInside your `variables.js` file, add an `if` block like this:\n```javascript\nif (true) {\n  let score = 10;\n}\nconsole.log(score);\n```\nPush your code when you are ready, and let's see what happens!";
-
-        config.currentStep = 2;
-      } else {
-        message =
-          "### 🤖 Bot Review: Step 1 Feedback\n\n❌ **Oops!** Make sure you declared a variable named `birthYear` using the exact `const` keyword inside `variables.js`.";
-      }
+\`\`\`javascript
+const birthYear = 2006;
+\`\`\`
+`;
     } else {
-      message =
-        "### 🤖 Bot Review: Step 1 Feedback\n\n❌ **File not found!** Please create a brand new file named `variables.js` in the root folder of your repository.";
-    }
-  }
+        const content = fs.readFileSync("variables.js", "utf8");
 
-  // --- LESSON 2 RULES ---
-  else if (step === 2) {
-    if (fs.existsSync('variables.js')) {
-      try {
-        execSync('node variables.js', { stdio: 'pipe' });
+        // STEP 1
+        if (
+            !content.includes("const birthYear") ||
+            content.includes("let birthYear") ||
+            content.includes("var birthYear")
+        ) {
+            message = `### 🤖 Step 1 Feedback
 
-        message =
-          "### 🤖 Bot Review: Step 2 Feedback\n\n❌ Your code ran successfully, which means `score` leaked outside its block scope! Ensure `let score = 10;` is inside the `if (true) { ... }` block and `console.log(score);` is outside of it.";
-      } catch (error) {
-        const output =
-          (error.stderr?.toString() || "") +
-          (error.stdout?.toString() || "") +
-          (error.message || "");
+❌ Declare **birthYear** using **const**.
 
-        if (output.includes("ReferenceError: score is not defined")) {
-          success = true;
+Example:
 
-          message =
-            "### 🤖 Bot Review: Step 2 Passed!\n\n🎉 **Brilliant!** You just witnessed block-scoping. Variables declared with `let` cannot be accessed outside the `{}` block they were made in. This prevents bugs!";
-
-          nextStepInstructions =
-            "### 📝 Step 3: Complete the Course\n\nYou've mastered `const` and `let`! Delete the error-causing `console.log(score)` line so your script runs smoothly, then push your final code.";
-
-          config.currentStep = 3;
-        } else {
-          message =
-            "### 🤖 Bot Review: Step 2 Feedback\n\n❌ Your code crashed, but not with the expected block-scope error. Ensure you are logging `score` outside the block.";
+\`\`\`javascript
+const birthYear = 2006;
+\`\`\`
+`;
         }
-      }
-    } else {
-      message =
-        "### 🤖 Bot Review: Step 2 Feedback\n\n❌ **variables.js** could not be found.";
+
+        // STEP 2 NOT STARTED
+        else if (
+            !content.includes("let score") ||
+            !content.includes("console.log(score)")
+        ) {
+            message = `### 🎉 Step 1 Passed!
+
+Great job using **const**.
+
+---
+
+## 📝 Step 2
+
+Now add this code below your first variable.
+
+\`\`\`javascript
+if (true) {
+    let score = 10;
+}
+
+console.log(score);
+\`\`\`
+
+Commit and push your changes.`;
+        }
+
+        // STEP 2
+        else {
+            try {
+                execSync("node variables.js", {
+                    stdio: "pipe"
+                });
+
+                message = `### 🤖 Step 2 Feedback
+
+❌ Your program ran successfully.
+
+It should produce a **ReferenceError**.
+
+Make sure
+
+- \`let score\` is INSIDE the if block.
+- \`console.log(score)\` is OUTSIDE the block.
+`;
+            } catch (error) {
+
+                const output =
+                    (error.stderr?.toString() || "") +
+                    (error.stdout?.toString() || "") +
+                    (error.message || "");
+
+                if (output.includes("ReferenceError")) {
+
+                    message = `### 🎉 Step 2 Passed!
+
+Excellent!
+
+You have just learned that **let is block scoped.**
+
+---
+
+## 📝 Final Step
+
+Delete
+
+\`\`\`javascript
+console.log(score);
+\`\`\`
+
+Run the file again.
+
+When there are no errors, push your code.`;
+
+                } else {
+
+                    message = `### 🤖 Step 2 Feedback
+
+❌ Your code crashed for another reason.
+
+Expected:
+
+ReferenceError: score is not defined
+`;
+                }
+            }
+
+            // COURSE COMPLETE
+            if (
+                !content.includes("console.log(score)") &&
+                content.includes("let score")
+            ) {
+
+                try {
+                    execSync("node variables.js", {
+                        stdio: "pipe"
+                    });
+
+                    message = `# 🏆 Congratulations!
+
+You completed the JavaScript Scope Course.
+
+You learned:
+
+- ✅ const
+- ✅ let
+- ✅ Block Scope
+
+Excellent work! 🎉`;
+
+                } catch {}
+            }
+        }
     }
-  }
 
-  // --- COURSE COMPLETE ---
-  else {
-    message =
-      "### 🤖 Bot Review: Course Complete!\n\n🏆 **Congratulations!** You have completed the JavaScript keywords introduction course!";
-  }
+    const summary = process.env.GITHUB_STEP_SUMMARY;
 
-  // Save progress
-  if (success) {
-    fs.writeFileSync(
-      '.github/config.json',
-      JSON.stringify(config, null, 2)
-    );
-
-    message += `\n\n${nextStepInstructions}`;
-  }
-
-  // Publish feedback
-  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
-
-  if (summaryPath) {
-    fs.appendFileSync(summaryPath, `${message}\n\n---\n`);
-  } else {
-    console.log(message);
-  }
+    if (summary) {
+        fs.appendFileSync(summary, message + "\n");
+    } else {
+        console.log(message);
+    }
 
 } catch (error) {
-  console.error(error);
-  process.exit(1);
+    console.error(error);
+    process.exit(1);
 }

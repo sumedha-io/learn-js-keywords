@@ -1,27 +1,20 @@
 name: JavaScript Scope Course
-on: [push]
+
+on:
+  push:
 
 jobs:
   verify-step:
     runs-on: ubuntu-latest
-    # This block explicitly grants the token permission to write comments
-    permissions:
-      contents: write
-      pull-requests: write
-      statuses: write
+
     steps:
       - name: Checkout student code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: Execute validation and post comment
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPOS_OWNER: ${{ github.repository_owner }}
-          REPO_NAME: ${{ github.event.repository.name }}
-          COMMIT_SHA: ${{ github.sha }}
+      - name: Validate submission
         run: node .github/scripts/validate.js

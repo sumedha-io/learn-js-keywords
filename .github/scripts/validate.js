@@ -62,7 +62,8 @@ try {
 
   // 3. Post global comment to the specific commit via GitHub CLI
   fs.writeFileSync('comment.txt', message);
-  execSync(`gh api repos/$REPOS_OWNER/$REPO_NAME/commits/$COMMIT_SHA/comments -F body=@comment.txt`);
+  execSync(`gh api repos/${process.env.REPOS_OWNER}/${process.env.REPO_NAME}/commits/${process.env.COMMIT_SHA}/comments -F body=@comment.txt`);
+
 
 } catch (err) {
   console.error("Bot script failed execution:", err);

@@ -60,12 +60,20 @@ try {
     message += `\n\n${nextStepInstructions}`;
   }
 
-  // 3. Post global comment to the specific commit via GitHub CLI
-  fs.writeFileSync('comment.txt', message);
-  execSync(`gh api repos/${process.env.REPOS_OWNER}/${process.env.REPO_NAME}/commits/${process.env.COMMIT_SHA}/comments -F body=@comment.txt`);
+ // 3. Publish feedback to the GitHub Actions job summary
+const summaryPath = process.env.GITHUB_STEP_SUMMARY;
 
-
-} catch (err) {
-  console.error("Bot script failed execution:", err);
-  process.exit(1);
+if (summaryPath) {
+  fs.appendFileSync(summaryPath, `${message}\n\n---\n`);
+} else {
+  console.log(message);
 }
+
+
+} catch (error) {
+  const output =
+    (error.stderr?.toString() || "") +
+    (error.stdout?.toString() || "") +
+    (error.message || "");
+
+  if (output.includes("ReferenceError: score is not defined")) }

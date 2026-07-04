@@ -55,12 +55,12 @@ try {
   }
 
   // 2. Save progress if they passed
-  if (success) {
-    fs.writeFileSync('.github/config.json', JSON.stringify(config, null, 2));
-    message += `\n\n${nextStepInstructions}`;
-  }
+if (success) {
+  fs.writeFileSync('.github/config.json', JSON.stringify(config, null, 2));
+  message += `\n\n${nextStepInstructions}`;
+}
 
- // 3. Publish feedback to the GitHub Actions job summary
+// 3. Publish feedback to the GitHub Actions job summary
 const summaryPath = process.env.GITHUB_STEP_SUMMARY;
 
 if (summaryPath) {
@@ -69,11 +69,7 @@ if (summaryPath) {
   console.log(message);
 }
 
-
 } catch (error) {
-  const output =
-    (error.stderr?.toString() || "") +
-    (error.stdout?.toString() || "") +
-    (error.message || "");
-
-  if (output.includes("ReferenceError: score is not defined")) }
+  console.error(error);
+  process.exit(1);
+}
